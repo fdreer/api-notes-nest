@@ -5,7 +5,6 @@ import { Repository } from 'typeorm'
 import { CreateNoteDto } from './dto/create-note.dto'
 import { IdType } from 'src/types'
 import { UUID } from 'crypto'
-import { UpdateUserDto } from '../users/dto/update-user.dto'
 import { UpdateNoteDto } from './dto/update-note.dto'
 
 @Injectable()

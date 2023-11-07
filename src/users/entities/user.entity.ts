@@ -1,7 +1,6 @@
 import { Note } from 'src/notes/entities/note.entity'
 import { IdType } from 'src/types'
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
