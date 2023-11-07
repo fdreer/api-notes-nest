@@ -33,10 +33,6 @@ export class UsersService {
     return this.noteService.findNotesFromUser(id)
   }
 
-  async update(id: IdType, newDataUser: UpdateUserDto) {
-    return await this.userRepository.update(id, newDataUser)
-  }
-
   async checkIfExist(createUserDto: CreateUserDto) {
     return await this.userRepository.exists(createUserDto)
   }

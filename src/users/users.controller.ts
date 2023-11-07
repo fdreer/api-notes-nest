@@ -1,18 +1,9 @@
-import {
-  Controller,
-  Body,
-  Get,
-  Param,
-  HttpStatus,
-  Patch,
-  ParseUUIDPipe,
-  HttpCode
-} from '@nestjs/common'
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common'
 import { UsersService } from './users.service'
-import { UpdateUserDto } from './dto/update-user.dto'
 import { IdType } from 'src/types'
+import { BASE_URL } from '../constants'
 
-@Controller('users')
+@Controller(`${BASE_URL}/users`)
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
 
@@ -26,17 +17,8 @@ export class UsersController {
     return await this.userService.findById(id)
   }
 
-  @Get(':id/notas')
-  async getAllFromUser(@Param('id', ParseUUIDPipe) id: IdType) {
+  @Get(':id/notes')
+  async getAllNotesFromUser(@Param('id', ParseUUIDPipe) id: IdType) {
     return await this.userService.findNotesFromUser(id)
-  }
-
-  @Patch(':id')
-  @HttpCode(HttpStatus.OK)
-  async update(
-    @Param('id', ParseUUIDPipe) id: IdType,
-    @Body() newDataUser: UpdateUserDto
-  ) {
-    return await this.userService.update(id, newDataUser)
   }
 }

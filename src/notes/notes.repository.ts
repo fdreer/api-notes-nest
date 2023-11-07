@@ -14,7 +14,7 @@ export class NotesRepository {
     private noteRepository: Repository<Note>
   ) {}
 
-  async save(createNoteDto: CreateNoteDto) {
+  async save(createNoteDto: CreateNoteDto): Promise<Note> {
     return await this.noteRepository.save(createNoteDto)
   }
 

@@ -6,8 +6,6 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
-  ClassSerializerInterceptor,
-  UseInterceptors,
   Patch,
   HttpCode,
   HttpStatus
@@ -17,13 +15,12 @@ import { CreateNoteDto } from './dto/create-note.dto'
 import { IdType } from 'src/types'
 import { UUID } from 'crypto'
 import { UpdateNoteDto } from './dto/update-note.dto'
+import { BASE_URL } from '../constants'
 
-@Controller('notes')
-@UseInterceptors(ClassSerializerInterceptor)
+@Controller(`${BASE_URL}/notes`)
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
-  // TODO: debo eliminar el userId de la respuesta
   @Post()
   async create(@Body() createNoteDto: CreateNoteDto) {
     return await this.notesService.create(createNoteDto)

@@ -28,7 +28,12 @@ export class NotesService {
       )
     }
 
-    return await this.noteRepository.save(createNoteDto)
+    // TODO: no funciona en este metodo el @Exclude() de class-transformer
+    const newNote = await this.noteRepository.save(createNoteDto)
+    return {
+      ...newNote,
+      userId: undefined
+    }
   }
 
   async findAll() {
