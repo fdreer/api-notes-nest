@@ -6,11 +6,12 @@ import { CreateNoteDto } from './dto/create-note.dto'
 import { IdType } from 'src/types'
 import { UUID } from 'crypto'
 import { UpdateNoteDto } from './dto/update-note.dto'
+import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
 export class NotesRepository {
   constructor(
-    @Inject(Providers.NOTE_REPO)
+    @InjectRepository(Note)
     private noteRepository: Repository<Note>
   ) {}
 

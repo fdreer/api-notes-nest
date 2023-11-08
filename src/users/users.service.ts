@@ -1,7 +1,6 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UsersRepository } from './users.repository'
-import { UpdateUserDto } from './dto/update-user.dto'
 import { IdType } from 'src/types'
 import { NotesService } from '../notes/notes.service'
 
