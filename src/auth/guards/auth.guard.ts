@@ -7,14 +7,15 @@ import {
 import { JwtService } from '@nestjs/jwt'
 import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
-import { jwtOptions } from 'src/constants'
-import { IS_PUBLIC_KEY } from './constants.decorators'
+import { jwtOptions } from '../../constants'
+import { IS_PUBLIC_KEY } from '../constants.decorators'
+import { Payload } from '../auth.types'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private reflector: Reflector
+    private reflector: Reflector // --> para recuperar metadatos de las rutas
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -24,11 +25,10 @@ export class AuthGuard implements CanActivate {
     ])
 
     if (isPublic) {
-      // 💡 See this condition
       return true
     }
 
-    const request = context.switchToHttp().getRequest()
+    const request: Request = context.switchToHttp().getRequest()
     const token = this.extractTokenFromHeader(request)
 
     if (!token) {
@@ -36,12 +36,21 @@ export class AuthGuard implements CanActivate {
     }
 
     try {
-      const payload = await this.jwtService.verifyAsync(token, {
+      const payload: Payload = await this.jwtService.verifyAsync(token, {
         secret: jwtOptions.secret
       })
-      // 💡 We're assigning the payload to the request object here
-      // so that we can access it in our route handlers
-      request['user'] = payload
+
+      request['payload'] = payload
+
+      // TODO: averiguar que esto sea una buena practica:
+      // en principio se hace esto para evitar que un usuario no pueda acceder a
+      // informacion de otro usuario --> el userId de la request debe ser igual
+      // al userId del payload
+      const isSameId = request.headers['user_id'] === payload.sub
+
+      if (!isSameId) {
+        throw new UnauthorizedException()
+      }
     } catch {
       throw new UnauthorizedException()
     }

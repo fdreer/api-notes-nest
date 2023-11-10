@@ -1,8 +1,10 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common'
-import { CreateUserDto } from './dto/create-user.dto'
+import { RegisterUserDto } from '../auth/dto/register-user.dto'
 import { UsersRepository } from './users.repository'
-import { IdType } from 'src/types'
+import { IdType } from '../types'
 import { NotesService } from '../notes/notes.service'
+import { plainToClass } from 'class-transformer'
+import { ReadUserDto } from './dto/read-user.dto'
 
 @Injectable()
 export class UsersService {
@@ -12,16 +14,20 @@ export class UsersService {
     private readonly noteService: NotesService
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    return await this.userRepository.save(createUserDto)
+  async create(createUserDto: RegisterUserDto) {
+    return this.userRepository.save(createUserDto)
   }
 
   async findAll() {
-    return await this.userRepository.findAll()
+    return this.userRepository
+      .findAll()
+      .then(users => users.map(user => plainToClass(ReadUserDto, user)))
   }
 
   async findById(id: IdType) {
-    return await this.userRepository.findById(id)
+    return await this.userRepository
+      .findById(id)
+      .then(user => plainToClass(ReadUserDto, user))
   }
 
   async findByUsername(username: string) {
@@ -32,7 +38,7 @@ export class UsersService {
     return this.noteService.findNotesFromUser(id)
   }
 
-  async checkIfExist(createUserDto: CreateUserDto) {
+  async checkIfExist(createUserDto: RegisterUserDto) {
     return await this.userRepository.exists(createUserDto)
   }
 }

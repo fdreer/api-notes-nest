@@ -6,10 +6,12 @@ import {
 } from '@nestjs/common'
 import { CreateNoteDto } from './dto/create-note.dto'
 import { NotesRepository } from './notes.repository'
-import { UsersService } from 'src/users/users.service'
-import { IdType } from 'src/types'
+import { UsersService } from '../users/users.service'
+import { IdType } from '../types'
 import { UpdateNoteDto } from './dto/update-note.dto'
 import { UUID } from 'crypto'
+import { plainToClass } from 'class-transformer'
+import { ReadNoteDto } from './dto/read-note.dto'
 
 @Injectable()
 export class NotesService {
@@ -28,16 +30,15 @@ export class NotesService {
       )
     }
 
-    // TODO: no funciona en este metodo el @Exclude() de class-transformer
-    const newNote = await this.noteRepository.save(createNoteDto)
-    return {
-      ...newNote,
-      userId: undefined
-    }
+    return this.noteRepository
+      .save(createNoteDto)
+      .then(note => plainToClass(ReadNoteDto, note))
   }
 
   async findAll() {
-    return await this.noteRepository.findAll()
+    return this.noteRepository
+      .findAll()
+      .then(notes => notes.map(note => plainToClass(ReadNoteDto, note)))
   }
 
   async findById(id: IdType) {
@@ -47,7 +48,7 @@ export class NotesService {
       throw new NotFoundException(`Note with id "${id}" not found`)
     }
 
-    return note
+    return plainToClass(ReadNoteDto, note)
   }
 
   async findNotesFromUser(id: IdType) {
@@ -57,14 +58,24 @@ export class NotesService {
       throw new NotFoundException(`User with id ${id} not found`)
     }
 
-    return await this.noteRepository.findNotesFromUser(id)
+    return this.noteRepository
+      .findNotesFromUser(id)
+      .then(notes => notes.map(note => plainToClass(ReadNoteDto, note)))
   }
 
   async update(id: UUID, updateNoteDto: UpdateNoteDto) {
-    return await this.noteRepository.update(id, updateNoteDto)
+    return this.noteRepository.update(id, updateNoteDto).then(updateResult => {
+      if (updateResult.affected == 0) {
+        throw new NotFoundException(`Note with id ${id} not found`)
+      }
+    })
   }
 
   async deleteById(id: IdType) {
-    return await this.noteRepository.deleteById(id)
+    const deleteResult = await this.noteRepository.deleteById(id)
+
+    if (deleteResult.affected === 0) {
+      throw new NotFoundException(`Note with id "${id}" not found`)
+    }
   }
 }

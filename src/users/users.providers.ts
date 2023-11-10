@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm'
 import { User } from './entities/user.entity'
 import { Provider } from '@nestjs/common'
-import { Providers } from 'src/providers.enum'
+import { Providers } from '../providers.enum'
 
 export const userProviders: Provider[] = [
   {

@@ -3,11 +3,14 @@ import {
   Injectable,
   UnauthorizedException
 } from '@nestjs/common'
-import { CreateUserDto } from 'src/users/dto/create-user.dto'
-import { LoginUserDto } from 'src/users/dto/login-user.dto'
-import { UsersService } from 'src/users/users.service'
+import { RegisterUserDto } from './dto/register-user.dto'
+import { LoginUserDto } from './dto/login-user.dto'
+import { UsersService } from '../users/users.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
+import { User } from '../users/entities/user.entity'
+import { AuthResponse } from '../types'
+import { Payload } from './auth.types'
 
 @Injectable()
 export class AuthService {
@@ -16,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async register(createUserDto: CreateUserDto) {
+  async register(createUserDto: RegisterUserDto) {
     const existUser = await this.userService.checkIfExist(createUserDto)
 
     if (existUser) {
@@ -25,21 +28,12 @@ export class AuthService {
       )
     }
 
-    const hashPassword = await bcrypt.hash(createUserDto.password, 10)
-
-    const newUser: CreateUserDto = {
+    const userSaved = await this.userService.create({
       username: createUserDto.username,
-      password: hashPassword
-    }
+      password: await bcrypt.hash(createUserDto.password, 10)
+    })
 
-    const userSaved = await this.userService.create(newUser)
-
-    const payload = { sub: userSaved.id, username: userSaved.username }
-
-    return {
-      jwt: await this.jwtService.signAsync(payload),
-      id: userSaved.id
-    }
+    return this.buildResponse(userSaved)
   }
 
   async login(userData: LoginUserDto) {
@@ -49,19 +43,32 @@ export class AuthService {
       throw new UnauthorizedException('Datos de inicio de sesión incorrectos')
     }
 
-    const { password: passwordDB, username } = user
-
+    const { password: passwordDB } = user
     const isPasswordValid = await bcrypt.compare(userData.password, passwordDB)
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Datos de inicio de sesión incorrectos')
     }
 
-    const payload = { sub: user.id, username }
+    return this.buildResponse(user)
+  }
 
+  private async buildResponse(user: User): Promise<AuthResponse> {
     return {
-      jwt: await this.jwtService.signAsync(payload),
+      jwt: await this.generateToken(this.buildPayload(user)),
       id: user.id
+    }
+  }
+
+  private async generateToken(payload: Payload): Promise<string> {
+    return await this.jwtService.signAsync(payload)
+  }
+
+  private buildPayload(user: User): Payload {
+    return {
+      sub: user.id,
+      username: user.username,
+      role: user.role
     }
   }
 }

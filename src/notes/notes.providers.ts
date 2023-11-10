@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm'
 import { Provider } from '@nestjs/common'
-import { Providers } from 'src/providers.enum'
+import { Providers } from '../providers.enum'
 import { Note } from './entities/note.entity'
 
 export const notesProviders: Provider[] = [

@@ -1,7 +1,7 @@
 import { Provider } from '@nestjs/common'
-import { Note } from 'src/notes/entities/note.entity'
-import { Providers } from 'src/providers.enum'
-import { User } from 'src/users/entities/user.entity'
+import { Note } from '../notes/entities/note.entity'
+import { Providers } from '../providers.enum'
+import { User } from '../users/entities/user.entity'
 import { DataSource } from 'typeorm'
 import {
   DB_HOST,

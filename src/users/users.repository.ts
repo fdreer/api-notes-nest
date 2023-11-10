@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { User } from './entities/user.entity'
-import { CreateUserDto } from './dto/create-user.dto'
+import { RegisterUserDto } from '../auth/dto/register-user.dto'
 import { Repository } from 'typeorm'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { IdType } from 'src/types'
+import { IdType } from '../types'
 import { InjectRepository } from '@nestjs/typeorm'
 
 @Injectable()
@@ -13,7 +13,7 @@ export class UsersRepository {
     private userRepository: Repository<User>
   ) {}
 
-  async save(createUserDto: CreateUserDto): Promise<User> {
+  async save(createUserDto: RegisterUserDto): Promise<User> {
     return await this.userRepository.save(createUserDto)
   }
 
@@ -33,7 +33,7 @@ export class UsersRepository {
     return await this.userRepository.update(id, newDataUser)
   }
 
-  async exists(createUserDto: CreateUserDto) {
+  async exists(createUserDto: RegisterUserDto) {
     return await this.userRepository.exist({
       where: {
         username: createUserDto.username

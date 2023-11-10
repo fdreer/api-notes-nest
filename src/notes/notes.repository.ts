@@ -1,9 +1,8 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common'
-import { Providers } from 'src/providers.enum'
+import { Injectable } from '@nestjs/common'
 import { Note } from './entities/note.entity'
 import { Repository } from 'typeorm'
 import { CreateNoteDto } from './dto/create-note.dto'
-import { IdType } from 'src/types'
+import { IdType } from '../types'
 import { UUID } from 'crypto'
 import { UpdateNoteDto } from './dto/update-note.dto'
 import { InjectRepository } from '@nestjs/typeorm'
@@ -24,8 +23,7 @@ export class NotesRepository {
   }
 
   async findById(id: IdType) {
-    const note = await this.noteRepository.findOneBy({ id })
-    return note
+    return await this.noteRepository.findOneBy({ id })
   }
 
   async findNotesFromUser(userId: IdType) {
@@ -34,16 +32,11 @@ export class NotesRepository {
   }
 
   async update(id: UUID, newDataNote: UpdateNoteDto) {
-    return this.noteRepository
-      .update({ id }, newDataNote)
-      .then(updateResult => {
-        if (updateResult.affected == 0) {
-          throw new NotFoundException(`Note with id ${id} not found`)
-        }
-      })
+    return this.noteRepository.update({ id }, newDataNote)
   }
 
   async deleteById(id: IdType) {
+    // Este metodo no verifica si existe la nota, solo borra si existe
     return await this.noteRepository.delete(id)
   }
 }
