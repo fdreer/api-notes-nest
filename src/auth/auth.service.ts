@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  ConflictException,
+  HttpStatus,
   Injectable,
   UnauthorizedException
 } from '@nestjs/common'
@@ -9,8 +11,8 @@ import { UsersService } from '../users/users.service'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from '@nestjs/jwt'
 import { User } from '../users/entities/user.entity'
-import { AuthResponse } from '../types'
 import { Payload } from './auth.types'
+import { AuthResponse } from './dto/auth-response.dto'
 
 @Injectable()
 export class AuthService {
@@ -20,13 +22,7 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: RegisterUserDto) {
-    const existUser = await this.userService.checkIfExist(createUserDto)
-
-    if (existUser) {
-      throw new BadRequestException(
-        `El usuario con el nombre ${createUserDto.username} ya existe`
-      )
-    }
+    await this.userService.checkIfExistByUsername(createUserDto)
 
     const userSaved = await this.userService.create({
       username: createUserDto.username,

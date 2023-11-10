@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common'
+import {
+  ConflictException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException
+} from '@nestjs/common'
 import { RegisterUserDto } from '../auth/dto/register-user.dto'
 import { UsersRepository } from './users.repository'
 import { IdType } from '../types'
@@ -25,9 +31,13 @@ export class UsersService {
   }
 
   async findById(id: IdType) {
-    return await this.userRepository
-      .findById(id)
-      .then(user => plainToClass(ReadUserDto, user))
+    const user = await this.userRepository.findById(id)
+
+    if (!user) {
+      throw new NotFoundException(`User with id "${id}" not found`)
+    }
+
+    return plainToClass(ReadUserDto, user)
   }
 
   async findByUsername(username: string) {
@@ -38,7 +48,21 @@ export class UsersService {
     return this.noteService.findNotesFromUser(id)
   }
 
-  async checkIfExist(createUserDto: RegisterUserDto) {
-    return await this.userRepository.exists(createUserDto)
+  async checkIfExistByUsername(createUserDto: RegisterUserDto) {
+    const exists = await this.userRepository.existsByUsername(createUserDto)
+
+    if (exists) {
+      throw new ConflictException(
+        `El usuario con el nombre ${createUserDto.username} ya existe`
+      )
+    }
+  }
+
+  async checkIfExistById(id: IdType) {
+    const exists = await this.userRepository.existsById(id)
+
+    if (!exists) {
+      throw new NotFoundException(`User with id "${id}" not found`)
+    }
   }
 }

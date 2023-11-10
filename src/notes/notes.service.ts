@@ -22,13 +22,7 @@ export class NotesService {
   ) {}
 
   async create(createNoteDto: CreateNoteDto) {
-    const user = await this.userService.findById(createNoteDto.userId)
-
-    if (!user) {
-      throw new NotFoundException(
-        `User with id "${createNoteDto.userId}" not found`
-      )
-    }
+    await this.userService.checkIfExistById(createNoteDto.userId)
 
     return this.noteRepository
       .save(createNoteDto)
@@ -52,11 +46,7 @@ export class NotesService {
   }
 
   async findNotesFromUser(id: IdType) {
-    const user = await this.userService.findById(id)
-
-    if (!user) {
-      throw new NotFoundException(`User with id ${id} not found`)
-    }
+    await this.userService.checkIfExistById(id)
 
     return this.noteRepository
       .findNotesFromUser(id)

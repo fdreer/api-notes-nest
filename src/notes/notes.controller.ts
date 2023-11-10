@@ -17,6 +17,7 @@ import { UUID } from 'crypto'
 import { UpdateNoteDto } from './dto/update-note.dto'
 import { BASE_URL } from '../constants'
 import {
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -25,14 +26,16 @@ import {
 } from '@nestjs/swagger'
 import { Roles } from '../auth/constants.decorators'
 import { Role } from '../users/entities/role'
+import { ReadNoteDto } from './dto/read-note.dto'
 
 @ApiTags('Notes')
+@ApiBearerAuth()
 @Controller(`${BASE_URL}/notes`)
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
   @Post()
-  @ApiCreatedResponse({ description: 'Note created' })
+  @ApiCreatedResponse({ description: 'Note created', type: ReadNoteDto })
   @ApiNotFoundResponse({ description: 'User not found' })
   async create(@Body() createNoteDto: CreateNoteDto) {
     return await this.notesService.create(createNoteDto)
@@ -40,13 +43,13 @@ export class NotesController {
 
   @Get()
   @Roles(Role.ADMIN)
-  @ApiOkResponse({ description: 'Notes found' })
+  @ApiOkResponse({ description: 'Notes found', type: [ReadNoteDto] })
   async getAll() {
     return await this.notesService.findAll()
   }
 
   @Get(':id')
-  @ApiOkResponse({ description: 'Note found' })
+  @ApiOkResponse({ description: 'Note found', type: ReadNoteDto })
   @ApiNotFoundResponse({ description: 'Note not found' })
   async getById(@Param('id', ParseUUIDPipe) id: IdType) {
     return await this.notesService.findById(id)
@@ -54,7 +57,8 @@ export class NotesController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  // TODO: documentar swagger
+  @ApiOkResponse({ description: 'Note updated' })
+  @ApiNotFoundResponse({ description: 'Note not found' })
   async update(
     @Param('id', ParseUUIDPipe) id: UUID,
     @Body() fields: UpdateNoteDto

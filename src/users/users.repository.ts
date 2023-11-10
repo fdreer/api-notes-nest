@@ -33,11 +33,17 @@ export class UsersRepository {
     return await this.userRepository.update(id, newDataUser)
   }
 
-  async exists(createUserDto: RegisterUserDto) {
+  async existsByUsername(createUserDto: RegisterUserDto) {
     return await this.userRepository.exist({
       where: {
         username: createUserDto.username
       }
+    })
+  }
+
+  async existsById(id: IdType) {
+    return await this.userRepository.exist({
+      where: { id }
     })
   }
 }
